@@ -1,6 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'screens/shop_page.dart';
 import 'screens/reports_page.dart';
+import 'screens/orders_page.dart';
 import 'screens/smart_home.dart';
 
 void main() => runApp(MaterialApp(debugShowCheckedModeBanner: false, home: Nav()));
@@ -8,7 +9,7 @@ void main() => runApp(MaterialApp(debugShowCheckedModeBanner: false, home: Nav()
 class Nav extends StatefulWidget { @override _NavState createState() => _NavState(); }
 class _NavState extends State<Nav> {
   int _idx = 0;
-  final _p = [SmartHomePage(), ReportsPage(isTracking: true), ReportsPage(isTracking: false), ShopPage(), Center(child: Text("حسابي"))];
+  final _p = [SmartHomePage(), OrdersPage(), ReportsPage(), ShopPage(), Center(child: Text("حسابي"))];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
