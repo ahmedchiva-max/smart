@@ -2,7 +2,10 @@
 import 'screens/smart_home.dart';
 import 'screens/shop_page.dart';
 
-void main() => runApp(MaterialApp(home: MainNavigation()));
+void main() => runApp(MaterialApp(
+  debugShowCheckedModeBanner: false,
+  home: MainNavigation(),
+));
 
 class MainNavigation extends StatefulWidget {
   @override
@@ -11,12 +14,18 @@ class MainNavigation extends StatefulWidget {
 
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
-  final List<Widget> _pages = [SmartHomePage(), ShopPage()];
+  final List<Widget> _pages = [
+    SmartHomePage(), 
+    Center(child: Text("صفحة الطلبات", style: TextStyle(color: Colors.white))),
+    Center(child: Text("صفحة التقارير", style: TextStyle(color: Colors.white))),
+    ShopPage(), 
+    Center(child: Text("حسابي", style: TextStyle(color: Colors.white))),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_currentIndex == 3 ? 1 : 0], // ربط أيقونة المتجر (رقم 3) بصفحة المتجر
+      body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.black,
         selectedItemColor: Colors.amber,
