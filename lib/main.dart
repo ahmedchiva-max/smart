@@ -15,8 +15,8 @@ class _UberElevatorsMasterState extends State<UberElevatorsMaster> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFF121212),
-      appBar: _customAppBar(context, "UBER ELEVATORS"),
-      body: _idx == 0 ? _buildHomeScreen(context) : Center(child: Text("قيد العمل")),
+      appBar: _customAppBar(context, "UBER ELEVATORS"), // تم الإصلاح هنا
+      body: _idx == 0 ? _buildHomeScreen(context) : Center(child: Text("قيد التطوير")),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _idx, onTap: (i) => setState(() => _idx = i),
         backgroundColor: Colors.black, selectedItemColor: Colors.amber, unselectedItemColor: Colors.grey,
@@ -32,7 +32,19 @@ class _UberElevatorsMasterState extends State<UberElevatorsMaster> {
     );
   }
 
-  // --- الواجهة المطابقة للصور حرفياً ---
+  // --- إصلاح نوع الـ AppBar ليعمل بدون أخطاء ---
+  PreferredSizeWidget _customAppBar(BuildContext ctx, String t) {
+    return AppBar(
+      backgroundColor: Colors.black, elevation: 10,
+      leading: IconButton(icon: Icon(Icons.arrow_back_ios, size: 18, color: Colors.amber), onPressed: () => Navigator.maybePop(ctx)),
+      title: Text(t, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.amber)),
+      actions: [
+        IconButton(icon: Icon(Icons.home_outlined), onPressed: () => Navigator.of(ctx).pushAndRemoveUntil(MaterialPageRoute(builder: (c)=>UberElevatorsMaster()), (r)=>false)),
+        IconButton(icon: Icon(Icons.close, color: Colors.red), onPressed: () => SystemNavigator.pop()),
+      ],
+    );
+  }
+
   Widget _buildHomeScreen(BuildContext context) {
     return SingleChildScrollView(
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -41,9 +53,7 @@ class _UberElevatorsMasterState extends State<UberElevatorsMaster> {
           _elevatorMiniCard("مصعد المنزل", "حي النرجس"),
           _elevatorMiniCard("مصعد المكتب", "برج رافال"),
         ]),
-        // زر إبلاغ عطل فوري (الأحمر)
         _redAlertButton(context),
-        // شبكة الخدمات الـ 6 (مطابقة للصورة)
         GridView.count(
           shrinkWrap: true, physics: NeverScrollableScrollPhysics(), crossAxisCount: 3, padding: EdgeInsets.all(10),
           children: [
@@ -59,7 +69,6 @@ class _UberElevatorsMasterState extends State<UberElevatorsMaster> {
     );
   }
 
-  // --- زر البلاغ الفوري ---
   Widget _redAlertButton(BuildContext ctx) => Container(
     margin: EdgeInsets.all(15), height: 60, decoration: BoxDecoration(color: Colors.red[900], borderRadius: BorderRadius.circular(10)),
     child: ListTile(
@@ -79,7 +88,6 @@ class _UberElevatorsMasterState extends State<UberElevatorsMaster> {
     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Icon(Icons.elevator, color: Colors.amber, size: 18), Text(n, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)), Text(l, style: TextStyle(fontSize: 9, color: Colors.grey))]),
   );
 
-  // --- تدفق الطلب المليء بالتفاصيل (The Heavy Logic) ---
   void _startRequestFlow(BuildContext context, String type) {
     final nameC = TextEditingController();
     final phoneC = TextEditingController();
@@ -89,11 +97,11 @@ class _UberElevatorsMasterState extends State<UberElevatorsMaster> {
       child: Column(children: [
         _customAppBar(context, "طلب $type"),
         Expanded(child: ListView(padding: EdgeInsets.all(20), children: [
-          _inputLabel("البيانات الشخصية"),
+          _inputLabel("بيانات العميل (إجباري)"),
           _field(nameC, "الاسم الثلاثي"),
           _field(phoneC, "الجوال (05XXXXXXXX)", isPhone: true),
           SizedBox(height: 20),
-          _inputLabel("موقع المصعد (إجباري)"),
+          _inputLabel("تحديد الموقع (إجباري)"),
           _locOption(context, "مشاركة الموقع الحالي (GPS)", Icons.my_location),
           _locOption(context, "واتساب المؤسسة (إرسال الموقع)", Icons.chat, isWhatsApp: true),
           _locOption(context, "لصق رابط جوجل ماب", Icons.link, isLink: true),
@@ -103,58 +111,50 @@ class _UberElevatorsMasterState extends State<UberElevatorsMaster> {
             style: ElevatedButton.styleFrom(backgroundColor: Colors.amber, minimumSize: Size(double.infinity, 50)),
             onPressed: () {
               if (nameC.text.length < 5 || phoneC.text.length != 10 || !phoneC.text.startsWith("05")) {
-                _errorPop(context, "بيانات خاطئة! تأكد من الاسم ورقم الجوال (05)");
+                _errorPop(context, "خطأ: الاسم يجب أن يكون ثلاثي والجوال 10 أرقام يبدأ بـ 05");
               } else { Navigator.pop(c); _brandSelection(context); }
-            }, child: Text("التالي (نوع المصعد)", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+            }, child: Text("التالي", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
           )
         ]))
       ]),
     ));
   }
 
-  // --- اختيار نوع المصعد والفني ---
   void _brandSelection(BuildContext ctx) {
     final brands = ["إيطالي", "فوجي", "فوجي تك", "أوتيس", "شيندلر", "ميتسوبيشي", "كوني", "هوم ليفت"];
     showDialog(context: ctx, builder: (c) => AlertDialog(
-      title: Text("اختر نوع المصعد"),
+      title: Text("نوع المصعد"),
       content: Wrap(spacing: 10, children: brands.map((b) => ActionChip(label: Text(b), onPressed: () { Navigator.pop(c); _techChoice(ctx, b); })).toList()),
     ));
   }
 
   void _techChoice(BuildContext ctx, String b) {
     showDialog(context: ctx, builder: (c) => AlertDialog(
-      title: Text("الفني الأقرب لـ $b"),
+      title: Text("اختيار الفني المتاح لـ $b"),
       content: Column(mainAxisSize: MainAxisSize.min, children: [
-        _techTile(ctx, "م. فهد العتيبي", "ID: 1102XXX", "متاح - خبير $b"),
-        _techTile(ctx, "م. سامي الحربي", "ID: 1099XXX", "متاح حالياً"),
+        _techTile(ctx, "م. فهد العتيبي", "1102XXX", "خبير $b - الأقرب"),
+        _techTile(ctx, "م. سامي الحربي", "1099XXX", "فني معتمد"),
       ]),
     ));
   }
 
   Widget _techTile(BuildContext ctx, String n, String id, String s) => ListTile(
-    leading: CircleAvatar(child: Icon(Icons.person)), title: Text(n), subtitle: Text("$id\n$s"),
-    onTap: () { HapticFeedback.heavyImpact(); Navigator.pop(ctx); _paymentFinal(ctx); },
+    leading: CircleAvatar(child: Icon(Icons.person)), title: Text(n), subtitle: Text("هوية: $id\n$s"),
+    onTap: () { HapticFeedback.heavyImpact(); Navigator.pop(ctx); _payment(ctx); },
   );
 
-  void _paymentFinal(BuildContext ctx) {
+  void _payment(BuildContext ctx) {
     showDialog(context: ctx, builder: (c) => AlertDialog(
-      title: Text("طرق الدفع"),
+      title: Text("الدفع"),
       content: Column(mainAxisSize: MainAxisSize.min, children: [
-        _pBtn("Apple Pay", Colors.black, Icons.apple),
-        _pBtn("STC Pay", Color(0xFF4F008C), Icons.account_balance_wallet),
-        _pBtn("تحويل بنكي", Colors.grey, Icons.account_balance),
+        _pBtn(ctx, "Apple Pay", Colors.black, Icons.apple),
+        _pBtn(ctx, "STC Pay", Color(0xFF4F008C), Icons.account_balance_wallet),
+        _pBtn(ctx, "تحويل بنكي", Colors.grey, Icons.account_balance),
       ]),
     ));
   }
 
-  Widget _pBtn(String t, Color c, IconData i) => Card(color: c, child: ListTile(leading: Icon(i, color: Colors.white), title: Text(t, style: TextStyle(color: Colors.white)), onTap: () {}));
-
-  // --- الأدوات المساعدة ---
-  Widget _customAppBar(BuildContext ctx, String t) => AppBar(
-    backgroundColor: Colors.black, leading: IconButton(icon: Icon(Icons.arrow_back_ios, size: 18, color: Colors.amber), onPressed: () => Navigator.maybePop(ctx)),
-    title: Text(t, style: TextStyle(fontSize: 15)),
-    actions: [IconButton(icon: Icon(Icons.home), onPressed: () => Navigator.of(ctx).pushAndRemoveUntil(MaterialPageRoute(builder: (c)=>UberElevatorsMaster()), (r)=>false)), IconButton(icon: Icon(Icons.close, color: Colors.red), onPressed: () => SystemNavigator.pop())],
-  );
+  Widget _pBtn(BuildContext ctx, String t, Color c, IconData i) => Card(color: c, child: ListTile(leading: Icon(i, color: Colors.white), title: Text(t, style: TextStyle(color: Colors.white)), onTap: () => Navigator.pop(ctx)));
 
   Widget _field(TextEditingController c, String h, {bool isPhone = false}) => Padding(
     padding: const EdgeInsets.only(bottom: 10),
@@ -163,12 +163,12 @@ class _UberElevatorsMasterState extends State<UberElevatorsMaster> {
 
   Widget _locOption(BuildContext ctx, String t, IconData i, {bool isWhatsApp=false, bool isLink=false, bool isDesc=false}) => ListTile(
     leading: Icon(i, color: isWhatsApp ? Colors.green : Colors.amber), title: Text(t, style: TextStyle(fontSize: 13)),
-    onTap: () { if(isWhatsApp) {} else if(isLink || isDesc) { _manualPop(ctx, t); } },
+    onTap: () { if(isLink || isDesc) { _manualPop(ctx, t); } },
   );
 
   void _manualPop(BuildContext ctx, String t) => showDialog(context: ctx, builder: (c) => AlertDialog(content: TextField(decoration: InputDecoration(hintText: t)), actions: [ElevatedButton(onPressed: () => Navigator.pop(c), child: Text("تأكيد"))]));
 
-  void _errorPop(BuildContext ctx, String m) => showDialog(context: ctx, builder: (c) => AlertDialog(title: Text("خطأ"), content: Text(m), actions: [TextButton(onPressed: () => Navigator.pop(c), child: Text("حسناً"))]));
+  void _errorPop(BuildContext ctx, String m) => showDialog(context: ctx, builder: (c) => AlertDialog(title: Text("تنبيه"), content: Text(m), actions: [TextButton(onPressed: () => Navigator.pop(c), child: Text("حسناً"))]));
 
   Widget _inputLabel(String t) => Padding(padding: const EdgeInsets.symmetric(vertical: 8), child: Text(t, style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold)));
 }
