@@ -1,31 +1,26 @@
 ﻿import 'package:flutter/material.dart';
 
 class ReportsPage extends StatelessWidget {
+  final bool isTracking; // تفرقة بين صفحة الطلبات والتقارير
+  ReportsPage({this.isTracking = false});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF1A1A1A),
-      appBar: AppBar(backgroundColor: Colors.black, title: Text("طلباتي والتتبع")),
+      backgroundColor: Color(0xFF121212),
+      appBar: AppBar(backgroundColor: Colors.black, title: Text(isTracking ? "طلباتي (تتبع)" : "التقارير المالية")),
       body: ListView(padding: EdgeInsets.all(15), children: [
-        _buildTrackCard("ماكينة سيكور + تركيب", "قيد التوصيل", "OTP: 7741", Colors.blue, "سيصل في: 06:00 PM"),
-        _buildTrackCard("كنترول سمارت 4 أدوار", "جاري التحقق", "OTP: 9902", Colors.orange, "بانتظار مراجعة الإيصال"),
+        _item("فاتورة #8812", "ماكينة سيكور", isTracking ? "قيد التوصيل" : "تم السداد", isTracking ? "OTP: 4421" : "PDF جاهز"),
+        _item("فاتورة #8813", "كنترول ذكي", isTracking ? "جاري التجهيز" : "تم السداد", isTracking ? "OTP: 9901" : "PDF جاهز"),
       ]),
     );
   }
 
-  Widget _buildTrackCard(String item, String status, String otp, Color color, String time) {
-    return Card(color: Color(0xFF2D2D2D), margin: EdgeInsets.only(bottom: 15), child: Padding(padding: EdgeInsets.all(15), child: Column(children: [
-      ListTile(
-        leading: Icon(Icons.local_shipping, color: color),
-        title: Text(item, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        subtitle: Text("الحالة: $status", style: TextStyle(color: color)),
-        trailing: Text(otp, style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold)),
-      ),
-      Divider(color: Colors.grey),
-      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        Text(time, style: TextStyle(color: Colors.grey, fontSize: 11)),
-        ElevatedButton.icon(onPressed: () {}, icon: Icon(Icons.picture_as_pdf, size: 16), label: Text("الفاتورة PDF"), style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent)),
-      ]),
-    ])));
+  Widget _item(String t, String s, String st, String extra) {
+    return Card(color: Color(0xFF1E1E1E), child: ListTile(
+      title: Text(t, style: TextStyle(color: Colors.amber)),
+      subtitle: Text("$s - $st", style: TextStyle(color: Colors.white70)),
+      trailing: ElevatedButton(onPressed: () {}, child: Text(isTracking ? extra : "طباعة PDF", style: TextStyle(fontSize: 10))),
+    ));
   }
 }

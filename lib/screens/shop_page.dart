@@ -18,7 +18,6 @@ class _ShopPageState extends State<ShopPage> {
   List<Product> cart = [];
   String? selectedCategory;
   bool isReceiptUploaded = false;
-  String? orderType; // قطعة فقط أم تركيب
 
   final List<Product> allProducts = [
     Product(name: "ماكينة سيكور 5.5 حصان", price: 4500, category: "قسم المكائن"),
@@ -31,168 +30,111 @@ class _ShopPageState extends State<ShopPage> {
     Product(name: "أزرار استدعاء ذهبية", price: 85, category: "الاكسسوارات"),
   ];
 
-  void _showCheckoutFlow() {
-    if (cart.isEmpty) { _showPopup("السلة فارغة! أضف بضاعة أولاً."); return; }
+  void _showCheckout() {
+    if (cart.isEmpty) { _msg("السلة فارغة! اختر بضاعة أولاً."); return; }
     _askInstall();
   }
 
   void _askInstall() {
     showDialog(context: context, builder: (ctx) => AlertDialog(
       title: Text("خيار التنفيذ"),
-      content: Text("هل ترغب في شراء القطعة فقط أم مع التركيب؟"),
+      content: Text("هل الشراء للقطعة فقط أم مع التركيب؟"),
       actions: [
-        ElevatedButton(onPressed: () { orderType = "قطعة فقط"; Navigator.pop(ctx); _askUserInfo(); }, child: Text("قطعة فقط")),
-        ElevatedButton(onPressed: () { orderType = "مع التركيب"; Navigator.pop(ctx); _askUserInfo(); }, child: Text("مع التركيب")),
+        ElevatedButton(onPressed: () { Navigator.pop(ctx); _askUser(); }, child: Text("قطعة فقط")),
+        ElevatedButton(onPressed: () { Navigator.pop(ctx); _askUser(); }, child: Text("مع التركيب")),
       ],
     ));
   }
 
-  void _askUserInfo() {
-    final nCtrl = TextEditingController();
-    final pCtrl = TextEditingController();
+  void _askUser() {
+    final n = TextEditingController();
+    final p = TextEditingController();
     showDialog(context: context, barrierDismissible: false, builder: (ctx) => AlertDialog(
-      title: Text("بيانات العميل (إجباري)"),
+      title: Text("بيانات العميل"),
       content: Column(mainAxisSize: MainAxisSize.min, children: [
-        TextField(controller: nCtrl, decoration: InputDecoration(hintText: "الاسم الكامل")),
-        TextField(
-          controller: pCtrl, 
-          keyboardType: TextInputType.phone, 
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(10)], 
-          decoration: InputDecoration(hintText: "رقم الجوال (05XXXXXXXX)")),
+        TextField(controller: n, decoration: InputDecoration(hintText: "الاسم الكامل")),
+        TextField(controller: p, keyboardType: TextInputType.phone, inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(10)], decoration: InputDecoration(hintText: "الجوال (05XXXXXXXX)")),
       ]),
       actions: [
         TextButton(onPressed: () {
-          if (nCtrl.text.isEmpty) { _showPopup("الاسم إجباري"); return; }
-          if (pCtrl.text.length == 10 && pCtrl.text.startsWith("05")) { Navigator.pop(ctx); _showLocation(); }
-          else { _showPopup("الرقم يجب أن يكون 10 أرقام ويبدأ بـ 05"); }
+          if (n.text.isEmpty) { _msg("الاسم إجباري"); return; }
+          if (p.text.length == 10 && p.text.startsWith("05")) { Navigator.pop(ctx); _askLoc(); }
+          else { _msg("خطأ: الرقم 10 أرقام ويبدأ بـ 05"); }
         }, child: Text("حسناً"))
       ],
     ));
   }
 
-  void _showLocation() {
+  void _askLoc() {
     showModalBottomSheet(context: context, builder: (ctx) => Column(mainAxisSize: MainAxisSize.min, children: [
-      ListTile(leading: Icon(Icons.my_location), title: Text("استخدام موقعي الحالي"), onTap: () { Navigator.pop(ctx); _showPopup("تم طلب الإذن وتحديد الموقع بنجاح"); _showPayment(); }),
-      ListTile(leading: Icon(Icons.chat), title: Text("إرسال عبر الواتساب"), onTap: () { launchUrl(Uri.parse("https://wa.me/966590000000")); _showPayment(); }),
-      ListTile(leading: Icon(Icons.map), title: Text("لصق رابط جوجل ماب"), onTap: () => _openInput("الصق رابط جوجل ماب هنا")),
-      ListTile(leading: Icon(Icons.edit), title: Text("وصف الموقع يدوياً"), onTap: () => _openInput("اكتب وصف الموقع بالتفصيل")),
+      ListTile(leading: Icon(Icons.my_location), title: Text("موقعي الحالي (طلب إذن)"), onTap: () { Navigator.pop(ctx); _msg("تم تحديد موقعك"); _showPay(); }),
+      ListTile(leading: Icon(Icons.chat), title: Text("إرسال عبر واتساب"), onTap: () { launchUrl(Uri.parse("https://wa.me/966590000000")); _showPay(); }),
+      ListTile(leading: Icon(Icons.map), title: Text("لصق رابط جوجل ماب"), onTap: () => _inputBox("الصق الرابط")),
+      ListTile(leading: Icon(Icons.description), title: Text("وصف الموقع يدوياً"), onTap: () => _inputBox("اكتب الوصف")),
     ]));
   }
 
-  void _openInput(String hint) {
-    final ctrl = TextEditingController();
+  void _inputBox(String h) {
+    final c = TextEditingController();
     showDialog(context: context, builder: (ctx) => AlertDialog(
-      content: TextField(controller: ctrl, decoration: InputDecoration(hintText: hint)),
-      actions: [ElevatedButton(onPressed: () { Navigator.pop(ctx); _showPayment(); }, child: Text("تأكيد"))],
+      content: TextField(controller: c, decoration: InputDecoration(hintText: h)),
+      actions: [ElevatedButton(onPressed: () { Navigator.pop(ctx); _showPay(); }, child: Text("تأكيد"))],
     ));
   }
 
-  void _showPayment() {
+  void _showPay() {
     showDialog(context: context, builder: (ctx) => AlertDialog(
-      title: Text("طريقة الدفع"),
+      title: Text("طرق الدفع المعتمدة"),
       content: Column(mainAxisSize: MainAxisSize.min, children: [
-        _payTile("Apple Pay", Colors.black, Icons.apple),
-        _payTile("STC Pay", Color(0xFF4F008C), Icons.payment),
-        _payTile("تحويل بنكي", Colors.blueGrey, Icons.account_balance, iban: "SA10000000000000000000"),
+        _pCard("Apple Pay", Colors.black, Icons.apple),
+        _pCard("STC Pay", Color(0xFF4F008C), Icons.account_balance_wallet),
+        _pCard("تحويل بنكي", Colors.blueGrey, Icons.account_balance),
+        Text("\nIBAN: SA9380000001234567890", style: TextStyle(color: Colors.amber, fontSize: 10)),
       ]),
-      actions: [
-        ElevatedButton(onPressed: () => _showUploadReceipt(), child: Text("رفع الإيصال (إجباري)")),
-      ],
+      actions: [ElevatedButton(onPressed: () => _upRec(), child: Text("رفع الإيصال (إجباري)"))],
     ));
   }
 
-  Widget _payTile(String t, Color c, IconData i, {String? iban}) => InkWell(
-    onTap: () => HapticFeedback.heavyImpact(),
-    child: Card(color: c, child: ListTile(
-      leading: Icon(i, color: Colors.white),
-      title: Text(t, style: TextStyle(color: Colors.white)),
-      subtitle: iban != null ? Text("IBAN: $iban", style: TextStyle(color: Colors.white, fontSize: 10)) : null,
-    )),
-  );
+  Widget _pCard(String t, Color c, IconData i) => InkWell(onTap: () => HapticFeedback.vibrate(), child: Card(color: c, child: ListTile(leading: Icon(i, color: Colors.white), title: Text(t, style: TextStyle(color: Colors.white)))));
 
-  void _showUploadReceipt() {
+  void _upRec() {
     showDialog(context: context, barrierDismissible: false, builder: (ctx) => AlertDialog(
-      title: Text("رفع إيصال الحوالة"),
-      content: Column(mainAxisSize: MainAxisSize.min, children: [
-        Icon(Icons.cloud_upload, size: 50, color: Colors.amber),
-        Text("يجب رفع صورة الحوالة لإتمام البيع"),
-        SizedBox(height: 10),
-        ElevatedButton(onPressed: () { 
-          setState(() => isReceiptUploaded = true); 
-          Navigator.pop(ctx);
-          _finish();
-        }, child: Text("اختيار صورة الإيصال")),
-      ]),
+      title: Text("إثبات الحوالة"),
+      content: Text("يجب اختيار صورة الإيصال لإتمام العملية"),
+      actions: [ElevatedButton(onPressed: () { setState(() { isReceiptUploaded = true; cart.clear(); }); Navigator.pop(ctx); _msg("تم بنجاح! راجع طلباتي"); }, child: Text("اختيار صورة"))],
     ));
   }
 
-  void _finish() {
-    if (!isReceiptUploaded) return;
-    _showPopup("تم استلام الطلب! رمز التحقق OTP الخاص بك هو 7741. تتبع طلبك من قسم 'طلباتي'.");
-    setState(() { cart.clear(); isReceiptUploaded = false; });
-  }
-
-  void _showPopup(String m) {
-    showDialog(context: context, builder: (ctx) => AlertDialog(content: Text(m), actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: Text("حسناً"))]));
-  }
+  void _msg(String m) => showDialog(context: context, builder: (c) => AlertDialog(content: Text(m), actions: [TextButton(onPressed: () => Navigator.pop(c), child: Text("حسناً"))]));
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF1A1A1A),
+      backgroundColor: Color(0xFF121212),
       appBar: AppBar(
         backgroundColor: Colors.black,
         leading: IconButton(icon: Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
-        title: Text(selectedCategory ?? "متجر SMART", style: TextStyle(color: Colors.amber)),
+        title: Text(selectedCategory ?? "متجر SMART"),
         actions: [
           Stack(alignment: Alignment.center, children: [
-            IconButton(icon: Icon(Icons.shopping_cart), onPressed: _showCheckoutFlow),
-            if(cart.isNotEmpty) Positioned(top: 8, right: 8, child: CircleAvatar(radius: 8, backgroundColor: Colors.red, child: Text("${cart.length}", style: TextStyle(fontSize: 10, color: Colors.white)))),
+            IconButton(icon: Icon(Icons.shopping_cart), onPressed: _showCheckout),
+            if(cart.isNotEmpty) Positioned(top: 5, right: 5, child: CircleAvatar(radius: 8, backgroundColor: Colors.red, child: Text("${cart.length}", style: TextStyle(fontSize: 10))))
           ]),
           IconButton(icon: Icon(Icons.close, color: Colors.red), onPressed: () => Navigator.pop(context)),
         ],
       ),
-      body: selectedCategory == null ? _buildCats() : _buildProds(),
-      floatingActionButton: selectedCategory != null ? FloatingActionButton(onPressed: () => setState(() => selectedCategory = null), child: Icon(Icons.home), backgroundColor: Colors.amber) : null,
+      body: selectedCategory == null ? _grid() : _list(),
+      floatingActionButton: selectedCategory != null ? FloatingActionButton(onPressed: () => setState(() => selectedCategory = null), child: Icon(Icons.home)) : null,
     );
   }
 
-  Widget _buildCats() {
-    final categories = [
-      {'n': 'قسم المكائن', 'i': Icons.settings},
-      {'n': 'قسم الكهرباء', 'i': Icons.flash_on},
-      {'n': 'الميكانيكا', 'i': Icons.build},
-      {'n': 'الأبواب', 'i': Icons.sensor_door},
-      {'n': 'الكبائن', 'i': Icons.view_quilt},
-      {'n': 'الكنترول', 'i': Icons.developer_board},
-      {'n': 'الاكسسوارات', 'i': Icons.stars},
-    ];
-    return GridView.builder(
-      padding: EdgeInsets.all(15),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-      itemCount: categories.length,
-      itemBuilder: (ctx, i) => Card(
-        color: Color(0xFF333333),
-        child: InkWell(
-          onTap: () => setState(() => selectedCategory = categories[i]['n'] as String),
-          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Icon(categories[i]['i'] as IconData, color: Colors.amber, size: 40),
-            Text(categories[i]['n'] as String, style: TextStyle(color: Colors.white)),
-          ]),
-        ),
-      ),
-    );
+  Widget _grid() {
+    final cats = [{'n': 'قسم المكائن', 'i': Icons.settings}, {'n': 'قسم الكهرباء', 'i': Icons.flash_on}, {'n': 'الميكانيكا', 'i': Icons.build}, {'n': 'الأبواب', 'i': Icons.sensor_door}, {'n': 'الكبائن', 'i': Icons.view_quilt}, {'n': 'الكنترول', 'i': Icons.developer_board}, {'n': 'الاكسسوارات', 'i': Icons.stars}];
+    return GridView.builder(padding: EdgeInsets.all(10), gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2), itemCount: cats.length, itemBuilder: (ctx, i) => Card(color: Color(0xFF222222), child: InkWell(onTap: () => setState(() => selectedCategory = cats[i]['n'] as String), child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(cats[i]['i'] as IconData, color: Colors.amber, size: 40), Text(cats[i]['n'] as String, style: TextStyle(color: Colors.white))]))));
   }
 
-  Widget _buildProds() {
-    final prods = allProducts.where((p) => p.category == selectedCategory).toList();
-    return ListView.builder(
-      itemCount: prods.length,
-      itemBuilder: (ctx, i) => ListTile(
-        title: Text(prods[i].name, style: TextStyle(color: Colors.white)),
-        subtitle: Text("${prods[i].price} ريال", style: TextStyle(color: Colors.amber)),
-        trailing: ElevatedButton(onPressed: () { setState(() => cart.add(prods[i])); HapticFeedback.lightImpact(); }, child: Text("إضافة للسلة")),
-      ),
-    );
+  Widget _list() {
+    final ps = allProducts.where((p) => p.category == selectedCategory).toList();
+    return ListView.builder(itemCount: ps.length, itemBuilder: (ctx, i) => ListTile(title: Text(ps[i].name, style: TextStyle(color: Colors.white)), subtitle: Text("${ps[i].price} ريال", style: TextStyle(color: Colors.amber)), trailing: ElevatedButton(onPressed: () { setState(() => cart.add(ps[i])); HapticFeedback.mediumImpact(); }, child: Text("إضافة"))));
   }
 }
