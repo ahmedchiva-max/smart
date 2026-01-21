@@ -6,9 +6,10 @@ class ShopPage extends StatefulWidget {
 }
 
 class _ShopPageState extends State<ShopPage> {
-  // الأقسام السبعة المطلوبة
+  // الأقسام السبعة + قسم باقات التحديث
   final List<Map<String, dynamic>> categories = [
     {'name': 'قسم المكائن', 'icon': Icons.settings, 'color': Colors.amber},
+    {'name': 'باقات التحديث (AR)', 'icon': Icons.view_in_ar, 'color': Colors.cyan}, // اقتراح 4
     {'name': 'قسم الكهرباء', 'icon': Icons.flash_on, 'color': Colors.yellow},
     {'name': 'الميكانيكا', 'icon': Icons.build, 'color': Colors.grey},
     {'name': 'الأبواب', 'icon': Icons.sensor_door, 'color': Colors.brown},
@@ -17,86 +18,54 @@ class _ShopPageState extends State<ShopPage> {
     {'name': 'الاكسسوارات', 'icon': Icons.stars, 'color': Colors.orange},
   ];
 
-  // دالة الشراء والتحقق
-  void _startOrder(String itemName) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Color(0xFF222222),
-        title: Text("خيار الشراء", style: TextStyle(color: Colors.white)),
-        content: Text("هل ترغب في شراء القطعة فقط أم مع التركيب؟", style: TextStyle(color: Colors.grey)),
-        actions: [
-          ElevatedButton(onPressed: () => _askPhone(itemName, "قطعة فقط"), child: Text("قطعة فقط")),
-          ElevatedButton(onPressed: () => _askPhone(itemName, "شراء مع تركيب"), child: Text("مع تركيب")),
-        ],
-      ),
-    );
-  }
-
-  void _askPhone(String item, String type) {
-    Navigator.pop(context);
-    TextEditingController phoneCtrl = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text("رقم الجوال"),
-        content: TextField(
-          controller: phoneCtrl,
-          keyboardType: TextInputType.number,
-          decoration: InputDecoration(hintText: "05XXXXXXXX"),
-        ),
-        actions: [
-          TextButton(onPressed: () {
-            String p = phoneCtrl.text;
-            if (p.length == 10 && p.startsWith("05")) {
-              Navigator.pop(context);
-              _askLocation(item, type, p);
-            } else {
-              _showPopup("خطأ: يجب إدخال 10 أرقام تبدأ بـ 05");
-            }
-          }, child: Text("حسناً"))
-        ],
-      ),
-    );
-  }
-
-  void _askLocation(String item, String type, String phone) {
+  // دالة الدفع بأيقونات واقعية (اقتراح 3)
+  void _showRealisticPayment() {
     showModalBottomSheet(
       context: context,
       backgroundColor: Color(0xFF1A1A1A),
-      builder: (context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ListTile(title: Text("تحديد الموقع", style: TextStyle(color: Colors.amber))),
-          ListTile(leading: Icon(Icons.my_location), title: Text("موقعي الحالي"), onTap: () => _showPayment()),
-          ListTile(leading: Icon(Icons.chat), title: Text("إرسال عبر الواتساب"), onTap: () => _showPayment()),
-          ListTile(leading: Icon(Icons.map), title: Text("لصق رابط جوجل ماب"), onTap: () => _showPayment()),
-        ],
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) => Container(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text("اختر طريقة الدفع الآمنة", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+            SizedBox(height: 20),
+            // Apple Pay - تصميم واقعي
+            _paymentTile("Apple Pay", Colors.black, Icons.apple, "دفع سريع بلمسة واحدة"),
+            // STC Pay - تصميم واقعي
+            _paymentTile("STC Pay", Color(0xFF4F008C), Icons.account_balance_wallet, "المحفظة الرقمية المفضلة"),
+            // التحويل البنكي
+            _paymentTile("تحويل بنكي", Colors.blueGrey, Icons.account_balance, "آيبان: SA123456..."),
+          ],
+        ),
       ),
     );
   }
 
-  void _showPayment() {
+  Widget _paymentTile(String title, Color color, IconData icon, String sub) {
+    return Card(
+      color: color,
+      margin: EdgeInsets.symmetric(vertical: 8),
+      child: ListTile(
+        leading: Icon(icon, color: Colors.white, size: 30),
+        title: Text(title, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        subtitle: Text(sub, style: TextStyle(color: Colors.white70, fontSize: 12)),
+        trailing: Icon(Icons.arrow_forward_ios, color: Colors.white, size: 15),
+        onTap: () => _showSuccess(),
+      ),
+    );
+  }
+
+  void _showSuccess() {
     Navigator.pop(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text("طريقة الدفع"),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(title: Text("Apple Pay"), leading: Icon(Icons.apple)),
-            ListTile(title: Text("STC Pay"), leading: Icon(Icons.payment)),
-            ListTile(title: Text("تحويل بنكي"), subtitle: Text("SA12345678901234567890"), leading: Icon(Icons.account_balance)),
-          ],
-        ),
-        actions: [ElevatedButton(onPressed: () => Navigator.pop(context), child: Text("رفع الإيصال وإتمام الطلب"))],
+        title: Icon(Icons.check_circle, color: Colors.green, size: 60),
+        content: Text("تمت العملية! تم تحديث ملف مصعدك الرقمي وإضافة نقاط الولاء لمحفظتك.", textAlign: TextAlign.center), // اقتراح 2 و 5
       ),
     );
-  }
-
-  void _showPopup(String msg) {
-    showDialog(context: context, builder: (context) => AlertDialog(content: Text(msg), actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text("حسناً"))]));
   }
 
   @override
@@ -105,23 +74,38 @@ class _ShopPageState extends State<ShopPage> {
       backgroundColor: Color(0xFF1A1A1A),
       appBar: AppBar(
         backgroundColor: Colors.black,
-        leading: IconButton(icon: Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
-        title: Text("أقسام المتجر"),
-        actions: [IconButton(icon: Icon(Icons.close, color: Colors.red), onPressed: () => Navigator.pop(context))],
+        title: Text("متجر SMART المطور", style: TextStyle(color: Colors.amber)),
+        actions: [
+          // أيقونة المحفظة ونقاط الولاء (اقتراح 5)
+          Padding(
+            padding: EdgeInsets.only(right: 15),
+            child: Row(
+              children: [
+                Icon(Icons.stars, color: Colors.amber, size: 20),
+                SizedBox(width: 5),
+                Text("150 نقطة", style: TextStyle(color: Colors.white)),
+              ],
+            ),
+          )
+        ],
       ),
       body: GridView.builder(
-        padding: EdgeInsets.all(10),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+        padding: EdgeInsets.all(12),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, childAspectRatio: 1.1),
         itemCount: categories.length,
         itemBuilder: (context, index) => Card(
-          color: Color(0xFF333333),
+          color: Color(0xFF2D2D2D),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
           child: InkWell(
-            onTap: () => _startOrder(categories[index]['name']),
+            onTap: () => _showRealisticPayment(),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(categories[index]['icon'], size: 50, color: categories[index]['color']),
-                Text(categories[index]['name'], style: TextStyle(color: Colors.white)),
+                Icon(categories[index]['icon'], size: 45, color: categories[index]['color']),
+                SizedBox(height: 8),
+                Text(categories[index]['name'], style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                if(categories[index]['name'].contains("AR")) 
+                  Text("معاينة حية", style: TextStyle(color: Colors.cyan, fontSize: 10)), // اقتراح 4
               ],
             ),
           ),
