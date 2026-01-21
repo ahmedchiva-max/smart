@@ -4,7 +4,11 @@ import 'screens/reports_page.dart';
 import 'screens/orders_page.dart';
 import 'screens/smart_home.dart';
 
-void main() => runApp(MaterialApp(debugShowCheckedModeBanner: false, home: Nav()));
+void main() => runApp(MaterialApp(
+  debugShowCheckedModeBanner: false,
+  theme: ThemeData(fontFamily: 'Arial'), // استخدام خط يدعم العربية برمجياً
+  home: Nav(),
+));
 
 class Nav extends StatefulWidget { @override _NavState createState() => _NavState(); }
 class _NavState extends State<Nav> {
