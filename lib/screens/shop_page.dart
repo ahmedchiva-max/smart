@@ -59,7 +59,7 @@ class _ShopPageState extends State<ShopPage> {
         TextButton(onPressed: () {
           if (n.text.isEmpty) { _msg("الاسم إجباري"); return; }
           if (p.text.length == 10 && p.text.startsWith("05")) { Navigator.pop(ctx); _askLoc(); }
-          else { _msg("خطأ: الرقم 10 أرقام ويبدأ بـ 05"); }
+          else { _msg("خطأ: الرقم يجب أن يكون 10 أرقام ويبدأ بـ 05"); }
         }, child: Text("حسناً"))
       ],
     ));
@@ -84,12 +84,12 @@ class _ShopPageState extends State<ShopPage> {
 
   void _showPay() {
     showDialog(context: context, builder: (ctx) => AlertDialog(
-      title: Text("طرق الدفع المعتمدة"),
+      title: Text("طرق الدفع"),
       content: Column(mainAxisSize: MainAxisSize.min, children: [
         _pCard("Apple Pay", Colors.black, Icons.apple),
         _pCard("STC Pay", Color(0xFF4F008C), Icons.account_balance_wallet),
         _pCard("تحويل بنكي", Colors.blueGrey, Icons.account_balance),
-        Text("\nIBAN: SA9380000001234567890", style: TextStyle(color: Colors.amber, fontSize: 10)),
+        Text("\nIBAN: SA9380000001234567890", style: TextStyle(color: Colors.amber, fontSize: 11, fontWeight: FontWeight.bold)),
       ]),
       actions: [ElevatedButton(onPressed: () => _upRec(), child: Text("رفع الإيصال (إجباري)"))],
     ));
@@ -101,7 +101,7 @@ class _ShopPageState extends State<ShopPage> {
     showDialog(context: context, barrierDismissible: false, builder: (ctx) => AlertDialog(
       title: Text("إثبات الحوالة"),
       content: Text("يجب اختيار صورة الإيصال لإتمام العملية"),
-      actions: [ElevatedButton(onPressed: () { setState(() { isReceiptUploaded = true; cart.clear(); }); Navigator.pop(ctx); _msg("تم بنجاح! راجع طلباتي"); }, child: Text("اختيار صورة"))],
+      actions: [ElevatedButton(onPressed: () { setState(() { isReceiptUploaded = true; cart.clear(); }); Navigator.pop(ctx); _msg("تم الطلب بنجاح! راجع قسم طلباتي"); }, child: Text("رفع صورة الإيصال"))],
     ));
   }
 
@@ -124,13 +124,38 @@ class _ShopPageState extends State<ShopPage> {
         ],
       ),
       body: selectedCategory == null ? _grid() : _list(),
-      floatingActionButton: selectedCategory != null ? FloatingActionButton(onPressed: () => setState(() => selectedCategory = null), child: Icon(Icons.home)) : null,
+      floatingActionButton: selectedCategory != null ? FloatingActionButton(backgroundColor: Colors.amber, onPressed: () => setState(() => selectedCategory = null), child: Icon(Icons.home)) : null,
     );
   }
 
   Widget _grid() {
-    final cats = [{'n': 'قسم المكائن', 'i': Icons.settings}, {'n': 'قسم الكهرباء', 'i': Icons.flash_on}, {'n': 'الميكانيكا', 'i': Icons.build}, {'n': 'الأبواب', 'i': Icons.sensor_door}, {'n': 'الكبائن', 'i': Icons.view_quilt}, {'n': 'الكنترول', 'i': Icons.developer_board}, {'n': 'الاكسسوارات', 'i': Icons.stars}];
-    return GridView.builder(padding: EdgeInsets.all(10), gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2), itemCount: cats.length, itemBuilder: (ctx, i) => Card(color: Color(0xFF222222), child: InkWell(onTap: () => setState(() => selectedCategory = cats[i]['n'] as String), child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(cats[i]['i'] as IconData, color: Colors.amber, size: 40), Text(cats[i]['n'] as String, style: TextStyle(color: Colors.white))]))));
+    final List<Map<String, dynamic>> cats = [
+      {'n': 'قسم المكائن', 'i': Icons.settings},
+      {'n': 'قسم الكهرباء', 'i': Icons.flash_on},
+      {'n': 'الميكانيكا', 'i': Icons.build},
+      {'n': 'الأبواب', 'i': Icons.sensor_door},
+      {'n': 'الكبائن', 'i': Icons.view_quilt},
+      {'n': 'الكنترول', 'i': Icons.developer_board},
+      {'n': 'الاكسسوارات', 'i': Icons.stars}
+    ];
+    return GridView.builder(
+      padding: EdgeInsets.all(10), 
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2), 
+      itemCount: cats.length, 
+      itemBuilder: (ctx, i) => Card(
+        color: Color(0xFF222222), 
+        child: InkWell(
+          onTap: () => setState(() => selectedCategory = cats[i]['n'] as String), 
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center, 
+            children: [
+              Icon(cats[i]['i'] as IconData, color: Colors.amber, size: 40), 
+              Text(cats[i]['n'] as String, style: TextStyle(color: Colors.white))
+            ]
+          )
+        )
+      )
+    );
   }
 
   Widget _list() {

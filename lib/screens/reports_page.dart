@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 class ReportsPage extends StatefulWidget {
   @override
@@ -20,11 +20,11 @@ class _ReportsPageState extends State<ReportsPage> with SingleTickerProviderStat
       backgroundColor: Color(0xFF121212),
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: Text("سجل التقارير الذكي", style: TextStyle(color: Colors.amber)),
+        title: Text("??? ???????? ?????", style: TextStyle(color: Colors.amber)),
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Colors.amber,
-          tabs: [Tab(text: "التقارير الجديدة"), Tab(text: "الأرشيف (المنتهية)")],
+          tabs: [Tab(text: "???????? ???????"), Tab(text: "??????? (????????)")],
         ),
       ),
       body: TabBarView(
@@ -38,23 +38,23 @@ class _ReportsPageState extends State<ReportsPage> with SingleTickerProviderStat
     return ListView(
       padding: EdgeInsets.all(10),
       children: [
-        if (!isArchive) _summaryCard(), // ملخص مالي للجديد فقط
+        if (!isArchive) _summaryCard(), // ???? ???? ?????? ???
         _reportTile(
-          name: "أحمد بن سلمان",
-          item: "ماكينة سيكور + تركيب",
-          price: "5750 ريال",
+          name: "???? ?? ?????",
+          item: "?????? ????? + ?????",
+          price: "5750 ????",
           time: "06:45:12 PM",
           date: "2026/01/21",
           method: "Apple Pay",
           isNew: !isArchive
         ),
         _reportTile(
-          name: "مؤسسة البرج",
-          item: "كنترول سمارت 4 أدوار",
-          price: "3220 ريال",
+          name: "????? ?????",
+          item: "?????? ????? 4 ?????",
+          price: "3220 ????",
           time: "02:30:00 PM",
           date: "2026/01/20",
-          method: "تحويل بنكي",
+          method: "????? ????",
           isNew: !isArchive
         ),
       ],
@@ -69,8 +69,8 @@ class _ReportsPageState extends State<ReportsPage> with SingleTickerProviderStat
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Column(children: [Text("إجمالي المبيعات", style: TextStyle(fontWeight: FontWeight.bold)), Text("8,970 ريال", style: TextStyle(fontSize: 20))]),
-            Column(children: [Text("الضريبة (15%)", style: TextStyle(fontWeight: FontWeight.bold)), Text("1,345 ريال", style: TextStyle(fontSize: 20))]),
+            Column(children: [Text("?????? ????????", style: TextStyle(fontWeight: FontWeight.bold)), Text("8,970 ????", style: TextStyle(fontSize: 20))]),
+            Column(children: [Text("??????? (15%)", style: TextStyle(fontWeight: FontWeight.bold)), Text("1,345 ????", style: TextStyle(fontSize: 20))]),
           ],
         ),
       ),
@@ -82,18 +82,18 @@ class _ReportsPageState extends State<ReportsPage> with SingleTickerProviderStat
       color: Color(0xFF1E1E1E),
       margin: EdgeInsets.symmetric(vertical: 8),
       child: ExpansionTile(
-        leading: Icon(isNew ? Icons.FiberNew : Icons.archive, color: isNew ? Colors.green : Colors.grey),
+        leading: Icon(isNew ? Icons.fiber_new : Icons.archive, color: isNew ? Colors.green : Colors.grey),
         title: Text(name, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         subtitle: Text("$date | $time", style: TextStyle(color: Colors.grey, fontSize: 12)),
         children: [
           Padding(
             padding: EdgeInsets.all(15),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text("البيان: $item", style: TextStyle(color: Colors.amber)),
-              Text("القيمة الإجمالية: $price", style: TextStyle(color: Colors.white)),
-              Text("طريقة الدفع: $method", style: TextStyle(color: Colors.white70)),
+              Text("??????: $item", style: TextStyle(color: Colors.amber)),
+              Text("?????? ?????????: $price", style: TextStyle(color: Colors.white)),
+              Text("????? ?????: $method", style: TextStyle(color: Colors.white70)),
               SizedBox(height: 10),
-              ElevatedButton.icon(onPressed: () {}, icon: Icon(Icons.picture_as_pdf), label: Text("تصدير الفاتورة الضريبية PDF"))
+              ElevatedButton.icon(onPressed: () {}, icon: Icon(Icons.picture_as_pdf), label: Text("????? ???????? ???????? PDF"))
             ]),
           )
         ],
